@@ -1,0 +1,27 @@
+{
+  "name": "puz/mail_autoembed",
+  "description": "Automatically embed all image sources in your emails",
+  "license": "MIT",
+  "keywords": ["laravel", "email", "mail", "image", "embed", "attach"],
+  "require": {
+    "swiftmailer/swiftmailer": "~5.1",
+    "illuminate/support": "^5.2"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.8",
+  },
+  "authors": [
+    {
+      "name": "Morten Mehus",
+      "email": "me@molty.no"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Puz\\Mail\\AutoEmbed\\": "src/"
+    }
+  },
+  "suggest": {
+    "illuminate/support": "Required to connect to Laravel with the service provider"
+  }
+}
