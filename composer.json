@@ -8,7 +8,7 @@
     "illuminate/support": "^5.2"
   },
   "require-dev": {
-    "phpunit/phpunit": "~4.8",
+    "phpunit/phpunit": "~4.8"
   },
   "authors": [
     {
