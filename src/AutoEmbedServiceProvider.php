@@ -6,13 +6,18 @@ use Illuminate\Support\ServiceProvider;
 
 class AutoEmbedServiceProvider extends ServiceProvider
 {
+    public function boot()
+    {
+        $this->app->make('mailer')->getSwiftMailer()->registerPlugin(new ImagesToAttachments);
+    }
+
     /**
-     * Register bindings in the container.
+     * Register the service provider.
      *
      * @return void
      */
     public function register()
     {
-        $this->app->make('mailer')->getSwiftMailer()->registerPlugin(new ImagesToAttachments);
+        // TODO: Nothing
     }
 }
