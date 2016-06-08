@@ -94,8 +94,8 @@ class EmbedImagesTest extends PHPUnit_Framework_TestCase
         $this->assertContains("Content-Transfer-Encoding: base64", $messageContent);
         $this->assertContains("Content-Disposition: inline; filename=", $messageContent);
 
-        // For some reason, swiftmailer returns 78 as max length, but the content is at max 76
-        $this->assertContains(implode(PHP_EOL, str_split($base64, 76)), $messageContent);
+        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+        $this->assertContains($base64, $oneLineContent);
     }
 
     /**
@@ -121,8 +121,8 @@ class EmbedImagesTest extends PHPUnit_Framework_TestCase
         $this->assertContains("Content-Transfer-Encoding: base64", $messageContent);
         $this->assertContains("Content-Disposition: inline; filename=", $messageContent);
 
-        // For some reason, swiftmailer returns 78 as max length, but the content is at max 76
-        $this->assertContains(implode(PHP_EOL, str_split($base64, 76)), $messageContent);
+        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+        $this->assertContains($base64, $oneLineContent);
     }
 
 
@@ -151,8 +151,7 @@ class EmbedImagesTest extends PHPUnit_Framework_TestCase
         $this->assertNotContains("Content-Transfer-Encoding: base64", $messageContent);
         $this->assertNotContains("Content-Disposition: inline; filename=", $messageContent);
 
-        // For some reason, swiftmailer returns 78 as max length, but the content is at max 76
-        $this->assertNotContains(implode(PHP_EOL, str_split($base64, 76)), $messageContent);
-
+        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+        $this->assertNotContains($base64, $oneLineContent);
     }
 }
