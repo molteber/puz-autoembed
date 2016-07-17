@@ -93,6 +93,18 @@ class ImagesToAttachments implements Swift_Events_SendListener
     protected function embedImage($src)
     {
         // TODO Is it from the interwebs?
+        
+        // Relative path attachments
+        if( substr($src, 0, 1) == '/' && !file_exists($src) ) {
+            if( function_exists( 'public_path' ) ) {
+                // Laravel-only, public path can be found from any sapi:
+                $src = public_path( $src );
+            } elseif ( php_sapi_name() !== 'cli' || preg_match('#phpunit$#', $_SERVER['SCRIPT_FILENAME']) ) {
+                // Standalone script; only from web:
+                $src = $_SERVER['DOCUMENT_ROOT'] . '/' . $src;
+            }
+        }
+
         $embed = $this->message->embed(Swift_Image::fromPath($src));
 
         return $embed;

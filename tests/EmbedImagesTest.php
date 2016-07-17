@@ -43,9 +43,71 @@ class EmbedImagesTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+    * @test
+    */
+    public function can_embed_local_image_relative_path_without_laravel()
+    {
+	$imageFile = "/data/smallimage.png";
+	$_SERVER['DOCUMENT_ROOT'] = dirname(__FILE__);
+	
+        $bodyBefore = "<img src='" . $imageFile . "'>";
+        $message = new Swift_Message("Test", $bodyBefore);
+
+        $this->mailer->send($message);
+
+
+        $bodyAfter = $message->getBody();
+        $this->assertNotEquals($bodyBefore, $bodyAfter, "Image was not inline embedded");
+
+        $this->assertRegExp("/<img src='cid:/", $bodyAfter, "Missing Content-ID from sent message");
+
+        $messageContent = (string) $message;
+
+        $this->assertContains("Content-Type: image/png; name=smallimage.png", $messageContent);
+        $this->assertContains("Content-Transfer-Encoding: base64", $messageContent);
+        $this->assertContains("Content-Disposition: inline; filename=smallimage.png", $messageContent);
+
+        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+        $this->assertContains(base64_encode(file_get_contents(dirname(__FILE__).$imageFile)), $oneLineContent);
+    }
+
+    /**
+    * @test
+    */
+    public function can_embed_local_image_relative_path_with_laravel()
+    {
+	function public_path( $path = '' )
+	{
+	    
+	    return dirname(__FILE__).'/' . $path;
+	}
+	$imageFile = "/data/smallimage.png";
+	
+        $bodyBefore = "<img src='" . $imageFile . "'>";
+        $message = new Swift_Message("Test", $bodyBefore);
+
+        $this->mailer->send($message);
+
+
+        $bodyAfter = $message->getBody();
+        $this->assertNotEquals($bodyBefore, $bodyAfter, "Image was not inline embedded");
+
+        $this->assertRegExp("/<img src='cid:/", $bodyAfter, "Missing Content-ID from sent message");
+
+        $messageContent = (string) $message;
+
+        $this->assertContains("Content-Type: image/png; name=smallimage.png", $messageContent);
+        $this->assertContains("Content-Transfer-Encoding: base64", $messageContent);
+        $this->assertContains("Content-Disposition: inline; filename=smallimage.png", $messageContent);
+
+        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+        $this->assertContains(base64_encode(file_get_contents(dirname(__FILE__).$imageFile)), $oneLineContent);
+    }
+
+    /**
      * @test
      */
-    public function can_embed_local_image()
+    public function can_embed_local_image_absolute_path()
     {
         $imageFile = __DIR__. "/data/smallimage.png";
 
