@@ -187,6 +187,35 @@ class EmbedImagesTest extends PHPUnit_Framework_TestCase
         $this->assertContains($base64, $oneLineContent);
     }
 
+    /**
+     * @test
+     */
+    public function can_embed_remote_image()
+    {
+        // TODO: Find a way to start built-in web server while running tests
+//        $imageFile = "http://localhost:1338/data/smallimage.png";
+//
+//        $bodyBefore = "<img src='" . $imageFile . "'>";
+//        $message = new Swift_Message("Test", $bodyBefore);
+//
+//        $this->mailer->send($message);
+//
+//
+//        $bodyAfter = $message->getBody();
+//        $this->assertNotEquals($bodyBefore, $bodyAfter, "Image was not inline embedded");
+//
+//        $this->assertRegExp("/<img src='cid:/", $bodyAfter, "Missing Content-ID from sent message");
+//
+//        $messageContent = (string) $message;
+//
+//        $this->assertContains("Content-Type: image/png; name=", $messageContent);
+//        $this->assertContains("Content-Transfer-Encoding: base64", $messageContent);
+//        $this->assertContains("Content-Disposition: inline; filename=", $messageContent);
+//
+//        $oneLineContent = preg_replace("/\n|\r/", "", $messageContent);
+//        $this->assertContains(base64_encode(file_get_contents($imageFile)), $oneLineContent);
+    }
+
 
     /**
      * @test

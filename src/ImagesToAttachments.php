@@ -51,6 +51,11 @@ class ImagesToAttachments implements Swift_Events_SendListener
 
     protected function attachImages()
     {
+        /*
+         * Does anyone have a better solution to detect images in given string?
+         * RegEx is NOT an optimal solution if given a inline data string. That's why I had to go for something like
+         * this (explode everywhere!) to not break some of the images and emails
+         */
         $images = explode("<img", $this->message->getBody());
         $imageCount = count($images);
         if ($imageCount > 1) {
@@ -78,7 +83,12 @@ class ImagesToAttachments implements Swift_Events_SendListener
                         continue;
                     }
                 } else {
-                    $embed = $this->embedImage($data[1]);
+                    $url = parse_url($data[1]);
+                    if (isset($url['host']) && !empty($url['host'])) {
+                        $embed = $this->embedRemoteImage($data[1]);
+                    } else {
+                        $embed = $this->embedLocalImage($data[1]);
+                    }
                 }
                 $img = "<img" . $src[0] . "src=" . $splitBy . $embed . $splitBy . $data[2] . ">";
 
@@ -90,16 +100,14 @@ class ImagesToAttachments implements Swift_Events_SendListener
         }
     }
 
-    protected function embedImage($src)
+    protected function embedLocalImage($src)
     {
-        // TODO Is it from the interwebs?
-        
         // Relative path attachments
-        if( substr($src, 0, 1) == '/' && !file_exists($src) ) {
-            if( function_exists( 'public_path' ) ) {
+        if (substr($src, 0, 1) == '/' && !file_exists($src)) {
+            if (function_exists('public_path')) {
                 // Laravel-only, public path can be found from any sapi:
-                $src = public_path( $src );
-            } elseif ( php_sapi_name() !== 'cli' || preg_match('#phpunit$#', $_SERVER['SCRIPT_FILENAME']) ) {
+                $src = public_path($src);
+            } elseif (php_sapi_name() !== 'cli' || preg_match('#phpunit$#', $_SERVER['SCRIPT_FILENAME'])) {
                 // Standalone script; only from web:
                 $src = $_SERVER['DOCUMENT_ROOT'] . '/' . $src;
             }
@@ -108,6 +116,30 @@ class ImagesToAttachments implements Swift_Events_SendListener
         $embed = $this->message->embed(Swift_Image::fromPath($src));
 
         return $embed;
+    }
+
+    protected function embedRemoteImage($url)
+    {
+        $fileInfo = getimagesize($url);
+
+        if ($fileInfo && isset($fileInfo['mime'])) {
+            if (strpos("image", $fileInfo['mime'] === 0)) {
+                $ext = explode("image/", $fileInfo['mime'])[1];
+
+                if ($ext == "jpeg") {
+                    $ext = "jpg";
+                }
+
+                $name = md5(microtime() . mt_rand()) . "." . $ext;
+
+                $filePath = $this->tempDir() . DIRECTORY_SEPARATOR . $name;
+                file_put_contents($filePath, file_get_contents($url));
+
+                $url = $this->message->embed(Swift_Image::fromPath($filePath));
+            }
+        }
+
+        return $url;
     }
 
     protected function embedDataImage($data)
@@ -121,7 +153,7 @@ class ImagesToAttachments implements Swift_Events_SendListener
             $ext = "jpg";
         }
 
-        $name = md5(microtime()) . "." . $ext;
+        $name = md5(microtime() . mt_rand()) . "." . $ext;
 
         $filePath = $this->tempDir() . DIRECTORY_SEPARATOR . $name;
         file_put_contents($filePath, base64_decode($data[1]));
